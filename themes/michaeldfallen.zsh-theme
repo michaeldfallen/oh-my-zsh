@@ -11,7 +11,7 @@ ZSH_THEME_GIT_PROMPT_DIVERGED_REMOTE="%{$fg_bold[magenta]%}↕%{$reset_color%}"
 
 
 function custom_git_dirty() {
-  if [ -n "$(is_git_dirty)" ]; then 
+  if [ -n "$(custom_is_git_dirty)" ]; then 
     echo "$ZSH_THEME_GIT_PROMPT_DIRTY"
   else
     echo "$ZSH_THEME_GIT_PROMPT_CLEAN"
@@ -27,10 +27,16 @@ function custom_is_git_dirty() {
 }
 
 function custom_git_remote_status() {
-    remote=${$(git rev-parse --verify ${hook_com[branch]}@{upstream} --symbolic-full-name 2>/dev/null)/refs\/remotes\/}
+    nohup git fetch > /dev/null &
+    # get the tracking-branch name
+    remote=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
+    
     if [[ -n ${remote} ]] ; then
-        ahead=$(echo $(git rev-list ${hook_com[branch]}@{upstream}..HEAD 2>/dev/null | wc -l) | xargs)
-        behind=$(echo $(git rev-list HEAD..${hook_com[branch]}@{upstream} 2>/dev/null | wc -l) | xargs)
+    	# creates global variables $1 and $2 based on left vs. right tracking
+    	# inspired by @adam_spiers
+    	set -- $(git rev-list --left-right --count $remote...HEAD)
+    	behind=$1
+    	ahead=$2
 
         if [ $ahead -eq 0 ] && [ $behind -gt 0 ]
         then
@@ -47,5 +53,5 @@ function custom_git_remote_status() {
 
 function custom_git_prompt_info() {
   ref=$(git symbolic-ref HEAD 2> /dev/null) || return
-  echo "$ZSH_THEME_GIT_PROMPT_PREFIX${ref#refs/heads/}$(git_dirty)${ZSH_THEME_GIT_PROMPT_SUFFIX}"
+  echo "$ZSH_THEME_GIT_PROMPT_PREFIX${ref#refs/heads/}$(parse_git_dirty)${ZSH_THEME_GIT_PROMPT_SUFFIX}"
 }
