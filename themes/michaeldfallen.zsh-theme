@@ -27,7 +27,7 @@ function custom_is_git_dirty() {
 }
 
 function custom_git_remote_status() {
-    nohup git fetch > /dev/null &
+    #nohup git fetch > /dev/null &
     # get the tracking-branch name
     remote=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
     
