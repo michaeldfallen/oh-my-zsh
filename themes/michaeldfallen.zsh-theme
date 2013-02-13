@@ -34,12 +34,12 @@ function custom_update_remotes() {
         
         secs=$(date -u +%s)
     	if [[ $(($secs - $last_update)) -gt "360" ]] ; then 
-	    echo "Refreshing remotes\n\n"
-            nohup git fetch > /dev/null &
+	    echo "Refreshing remotes"
+            nohup git fetch > /dev/null 2>&1 /dev/null 
     	fi
     else
-        echo "Refreshing remotes\n\n"
-        nohup git fetch > /dev/null &
+        echo "Refreshing remotes"
+        nohup git fetch > /dev/null 2>&1 /dev/null
     fi
 }
 
