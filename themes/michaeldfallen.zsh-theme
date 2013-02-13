@@ -27,13 +27,23 @@ function custom_is_git_dirty() {
 }
 
 function custom_update_remotes() {
-    last_update=$(stat -f %m "$(git rev-parse --show-toplevel)/.git/FETCH_HEAD")
-    secs=$(date -u +%s)
-    if [[ $(($secs - $last_update)) -gt "360" ]] ; then 
-	echo "Refreshing remotes\n"
+    ref=$(git symbolic-ref HEAD 2> /dev/null) || return
+    fetch_head="$(git rev-parse --show-toplevel)/.git/FETCH_HEAD"
+    if [ -f $fetch_head ]; then 
+        last_update=$(stat -f %m $fetch_head)
+        
+        secs=$(date -u +%s)
+    	if [[ $(($secs - $last_update)) -gt "360" ]] ; then 
+	    echo "Refreshing remotes\n\n"
+            nohup git fetch > /dev/null &
+    	fi
+    else
+        echo "Refreshing remotes\n\n"
         nohup git fetch > /dev/null &
     fi
 }
+
+custom_update_remotes
 
 function custom_git_remote_status() {
     # get the tracking-branch name
@@ -61,6 +71,5 @@ function custom_git_remote_status() {
 
 function custom_git_prompt_info() {
   ref=$(git symbolic-ref HEAD 2> /dev/null) || return
-  custom_update_remotes
   echo "$ZSH_THEME_GIT_PROMPT_PREFIX${ref#refs/heads/}$(parse_git_dirty)${ZSH_THEME_GIT_PROMPT_SUFFIX}$(custom_git_remote_status)"
 }
