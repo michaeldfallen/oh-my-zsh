@@ -1,5 +1,7 @@
 PROMPT='%{$fg_bold[red]%}➜ %{$fg_bold[green]%}%p %{$fg[cyan]%}%c %{$FG[237]%}$(custom_git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'
 
+LAST_UPDATE=0
+
 ZSH_THEME_GIT_PROMPT_PREFIX="git:(%{$FG[243]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_DIRTY="%{$FG[237]%}) %{$fg[red]%}✗%{$reset_color%}"
@@ -27,7 +29,12 @@ function custom_is_git_dirty() {
 }
 
 function custom_git_remote_status() {
-    #nohup git fetch > /dev/null &
+    mins=$(date +%M)
+    if [[ $(($mins - $LAST_UPDATE)) -gt "300000" ]] ; then 
+ 	LAST_UPDATE=$mins
+	echo "\nRefreshing remotes"
+        nohup git fetch > /dev/null &
+    fi
     # get the tracking-branch name
     remote=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
     
