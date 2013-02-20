@@ -1,4 +1,4 @@
-PROMPT='%{$fg_bold[red]%}➜ %{$fg_bold[green]%}%p %{$fg[cyan]%}%c %{$FG[237]%}$(custom_git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'
+PROMPT='$(custom_update_remotes)%{$fg_bold[red]%}➜ %{$fg_bold[green]%}%p %{$fg[cyan]%}%c %{$FG[237]%}$(custom_git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'
 
 ZSH_THEME_GIT_PROMPT_PREFIX="git:(%{$FG[243]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
@@ -34,16 +34,12 @@ function custom_update_remotes() {
         
         secs=$(date -u +%s)
     	if [[ $(($secs - $last_update)) -gt "360" ]] ; then 
-	    echo "Refreshing remotes"
-            nohup git fetch > /dev/null 2>&1 /dev/null 
+	    (nohup git fetch --prune > /dev/null &) 2> /dev/null
     	fi
     else
-        echo "Refreshing remotes"
-        nohup git fetch > /dev/null 2>&1 /dev/null
+        (nohup git fetch --prune > /dev/null &) 2> /dev/null
     fi
 }
-
-custom_update_remotes
 
 function custom_git_remote_status() {
     # get the tracking-branch name
