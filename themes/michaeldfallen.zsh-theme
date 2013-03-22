@@ -1,13 +1,12 @@
-PROMPT='$(custom_update_remotes)%{$fg_bold[red]%}➜ %{$fg_bold[green]%}%p %{$fg[cyan]%}%c %{$FG[237]%}$(custom_git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'
+PROMPT='$(custom_update_remotes)%{$fg_bold[red]%} ➜%{$fg_bold[green]%}%p %{$fg[cyan]%}%c $(custom_git_prompt_info)%{$fg_bold[blue]%}% %{$reset_color%}'
 
-ZSH_THEME_GIT_PROMPT_PREFIX="git:(%{$FG[243]%}"
-ZSH_THEME_GIT_PROMPT_SUFFIX="%{$FG[237]%}) %{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}✗%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[green]%}✓%{$reset_color%}"
+ZSH_THEME_GIT_PROMPT_PREFIX="%{$FG[243]%}git:(%{$FG[249]%}"
+ZSH_THEME_GIT_PROMPT_SUFFIX="%{$FG[243]%})%{$reset_color%} "
+ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}✗%{$reset_color%} "
+ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[green]%}✓%{$reset_color%} "
 
-ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE="%{$fg_bold[magenta]%}↓%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE="%{$fg_bold[magenta]%}↑%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_DIVERGED_REMOTE="%{$fg_bold[magenta]%}↕%{$reset_color%}"
+ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE="%{$FG[039]%}↓%{$reset_color%}"
+ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE="%{$FG[166]%}↑%{$reset_color%}"
 
 alias git-graph='git log --graph --color --all --pretty=format:"%C(yellow)%H%C(green)%d%C(reset)%n%x20%cd%n%x20%cn%x20(%ce)%n%x20%s%n"'
 
@@ -61,18 +60,18 @@ function custom_git_remote_status() {
 
         if [ $ahead -eq 0 ] && [ $behind -gt 0 ]
         then
-            echo " $behind$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE"
+            echo " %{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE"
         elif [ $ahead -gt 0 ] && [ $behind -eq 0 ]
         then
-            echo " $ahead$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE"
+            echo " %{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE"
         elif [ $ahead -gt 0 ] && [ $behind -gt 0 ]
         then
-            echo " $behind$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE $ahead$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE"
+            echo " %{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE %{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE"
         fi
     fi
 }
 
 function custom_git_prompt_info() {
   ref=$(git symbolic-ref HEAD 2> /dev/null) || return
-  echo "$ZSH_THEME_GIT_PROMPT_PREFIX${ref#refs/heads/}${ZSH_THEME_GIT_PROMPT_SUFFIX}$(parse_git_dirty)$(custom_git_remote_status)"
+  echo "$ZSH_THEME_GIT_PROMPT_PREFIX${ref#refs/heads/}$(custom_git_remote_status)${ZSH_THEME_GIT_PROMPT_SUFFIX}$(parse_git_dirty)"
 }
