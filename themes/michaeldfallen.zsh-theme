@@ -1,4 +1,4 @@
-PROMPT='$(custom_update_remotes)%{$fg_bold[red]%} ➜%{$fg_bold[green]%}%p %{$fg[cyan]%}%c $(custom_git_prompt_info)%{$fg_bold[blue]%}% %{$reset_color%}'
+PROMPT='$(custom_update_remotes)%{$fg_bold[red]%}➜%{$fg_bold[green]%}%p %{$fg[cyan]%}%c $(custom_git_prompt_info)%{$fg_bold[blue]%}% %{$reset_color%}'
 
 ZSH_THEME_GIT_PROMPT_PREFIX="%{$FG[243]%}git:(%{$FG[249]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$FG[243]%})%{$reset_color%} "
@@ -31,6 +31,22 @@ function shouldnt_you_commit {
   if [ "$(minutes_since_last_commit)" -gt 2 ]; then 
     echo "%{$fg[234]%}ಠ_ಠ %{$reset_color%}"
   fi
+}
+
+function untracked_files {
+  echo "$(git status --porcelain 2>/dev/null| grep -o "??" | wc -l)"
+}
+
+function added_files {
+  echo "$(git status --porcelain 2>/dev/null| grep -o "A" | wc -l)"
+}
+
+function deleted_files {
+  echo "$(git status --porcelain 2>/dev/null| grep -o "D" | wc -l)"
+}
+
+function modified_files {
+  echo "$(git status --porcelain 2>/dev/null| grep -o "M" | wc -l)"
 }
 
 function custom_update_remotes() {
