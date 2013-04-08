@@ -34,19 +34,19 @@ function shouldnt_you_commit {
 }
 
 function untracked_files {
-  echo "$(git status --porcelain 2>/dev/null| grep -o "??" | wc -l)"
+  echo "$(git status --porcelain 2>/dev/null| grep -o "??" | wc -l | grep -oEi '[0-9]+')"
 }
 
 function added_files {
-  echo "$(git status --porcelain 2>/dev/null| grep -o "A" | wc -l)"
+  echo "$(git status --porcelain 2>/dev/null| grep -o "A" | wc -l | grep -oEi '[0-9]+')"
 }
 
 function deleted_files {
-  echo "$(git status --porcelain 2>/dev/null| grep -o "D" | wc -l)"
+  echo "$(git status --porcelain 2>/dev/null| grep -o "D" | wc -l | grep -oEi '[0-9]+')"
 }
 
 function modified_files {
-  echo "$(git status --porcelain 2>/dev/null| grep -o "M" | wc -l)"
+  echo "$(git status --porcelain 2>/dev/null| grep -o "M" | wc -l | grep -oEi '[0-9]+')"
 }
 
 function custom_update_remotes() {
