@@ -4,6 +4,11 @@ ZSH_THEME_GIT_PROMPT_PREFIX="%{$FG[243]%}git:(%{$FG[249]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$FG[243]%})%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}✗%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[green]%}✓%{$reset_color%} "
+ZSH_THEME_GIT_PROMPT_ADDED="A"
+ZSH_THEME_GIT_PROMPT_DELETED="D"
+ZSH_THEME_GIT_PROMPT_MODIFIED="M"
+ZSH_THEME_GIT_PROMPT_UNTRACKED="U"
+
 ZSH_THEME_GIT_PROMPT_SEPARATOR="%{$FG[243]%}|%{$reset_color%}"
 
 ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE="%{$FG[039]%}↓%{$reset_color%}"
@@ -34,19 +39,51 @@ function shouldnt_you_commit {
 }
 
 function untracked_files {
-  echo "$(git status --porcelain 2>/dev/null| grep -o "??" | wc -l | grep -oEi '[0-9]+')"
+  echo "$(git status --porcelain 2>/dev/null| grep -o "?? " | wc -l | grep -oEi '[1-9][0-9]*')"
 }
 
 function added_files {
-  echo "$(git status --porcelain 2>/dev/null| grep -o "A" | wc -l | grep -oEi '[0-9]+')"
+  echo "$(git status --porcelain 2>/dev/null| grep -o "A " | wc -l | grep -oEi '[1-9][0-9]*')"
 }
 
 function deleted_files {
-  echo "$(git status --porcelain 2>/dev/null| grep -o "D" | wc -l | grep -oEi '[0-9]+')"
+  echo "$(git status --porcelain 2>/dev/null| grep -o "D " | wc -l | grep -oEi '[1-9][0-9]*')"
 }
 
 function modified_files {
-  echo "$(git status --porcelain 2>/dev/null| grep -o "M" | wc -l | grep -oEi '[0-9]+')"
+  echo "$(git status --porcelain 2>/dev/null| grep -o "M " | wc -l | grep -oEi '[1-9][0-9]*')"
+}
+
+function untracked_files_status {
+  untracked=$(untracked_files)
+  if [ -n "$untracked" ]; then 
+    echo "$untracked$ZSH_THEME_GIT_PROMPT_UNTRACKED "
+  fi
+}
+
+function added_files_status {
+  added=$(added_files)
+  if [ -n "$added" ]; then 
+    echo "$added$ZSH_THEME_GIT_PROMPT_ADDED "
+  fi
+}
+
+function deleted_files_status {
+  deleted=$(deleted_files)
+  if [ -n "$deleted" ]; then 
+    echo "$deleted$ZSH_THEME_GIT_PROMPT_DELETED "
+  fi
+}
+
+function modified_files_status {
+  modified=$(modified_files)
+  if [ -n "$modified" ]; then 
+    echo "$modified$ZSH_THEME_GIT_PROMPT_MODIFIED "
+  fi
+}
+
+function git_files_status {
+  echo "$(untracked_files_status)$(added_files_status)$(deleted_files_status)$(modified_files_status)"  
 }
 
 function custom_update_remotes() {
@@ -90,5 +127,5 @@ function custom_git_remote_status() {
 
 function custom_git_prompt_info() {
   ref=$(git symbolic-ref HEAD 2> /dev/null) || return
-  echo "$ZSH_THEME_GIT_PROMPT_PREFIX${ref#refs/heads/}$(custom_git_remote_status)${ZSH_THEME_GIT_PROMPT_SUFFIX}$(parse_git_dirty)"
+  echo "$ZSH_THEME_GIT_PROMPT_PREFIX${ref#refs/heads/}$(custom_git_remote_status)${ZSH_THEME_GIT_PROMPT_SUFFIX}$(git_files_status)$(parse_git_dirty)"
 }
