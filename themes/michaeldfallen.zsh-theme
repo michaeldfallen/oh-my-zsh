@@ -34,56 +34,28 @@ function minutes_since_last_commit {
 
 function shouldnt_you_commit {
   if [ "$(minutes_since_last_commit)" -gt 2 ]; then 
-    echo "%{$fg[234]%}ಠ_ಠ %{$reset_color%}"
-  fi
-}
-
-function untracked_files {
-  echo "$(git status --porcelain 2>/dev/null| grep -o "?? " | wc -l | grep -oEi '[1-9][0-9]*')"
-}
-
-function added_files {
-  echo "$(git status --porcelain 2>/dev/null| grep -o "A " | wc -l | grep -oEi '[1-9][0-9]*')"
-}
-
-function deleted_files {
-  echo "$(git status --porcelain 2>/dev/null| grep -o "D " | wc -l | grep -oEi '[1-9][0-9]*')"
-}
-
-function modified_files {
-  echo "$(git status --porcelain 2>/dev/null| grep -o "M " | wc -l | grep -oEi '[1-9][0-9]*')"
-}
-
-function untracked_files_status {
-  untracked=$(untracked_files)
-  if [ -n "$untracked" ]; then 
-    echo "$untracked$ZSH_THEME_GIT_PROMPT_UNTRACKED "
-  fi
-}
-
-function added_files_status {
-  added=$(added_files)
-  if [ -n "$added" ]; then 
-    echo "$added$ZSH_THEME_GIT_PROMPT_ADDED "
-  fi
-}
-
-function deleted_files_status {
-  deleted=$(deleted_files)
-  if [ -n "$deleted" ]; then 
-    echo "$deleted$ZSH_THEME_GIT_PROMPT_DELETED "
-  fi
-}
-
-function modified_files_status {
-  modified=$(modified_files)
-  if [ -n "$modified" ]; then 
-    echo "$modified$ZSH_THEME_GIT_PROMPT_MODIFIED "
+    echo "|%{$fg[234]%}ಠ_ಠ%{$reset_color%}"
   fi
 }
 
 function git_files_status {
-  echo "$(untracked_files_status)$(added_files_status)$(deleted_files_status)$(modified_files_status)"  
+  statS=$(git status --porcelain 2>/dev/null)
+  untracked="$(echo "$statS" | grep -o "?? " | wc -l | grep -oEi '[1-9][0-9]*')"
+  added="$(echo "$statS" | grep -o "A " | wc -l | grep -oEi '[1-9][0-9]*')"
+  deleted="$(echo "$statS" | grep -o "D " | wc -l | grep -oEi '[1-9][0-9]*')"
+  modified="$(echo "$statS" | grep -o "M " | wc -l | grep -oEi '[1-9][0-9]*')"
+  if [ -n "$added" ]; then
+    echo -n "$added$ZSH_THEME_GIT_PROMPT_ADDED "
+  fi
+  if [ -n "$untracked" ]; then 
+    echo -n "$untracked$ZSH_THEME_GIT_PROMPT_UNTRACKED "
+  fi
+  if [ -n "$deleted" ]; then 
+    echo -n "$deleted$ZSH_THEME_GIT_PROMPT_DELETED "
+  fi
+  if [ -n "$modified" ]; then 
+    echo -n "$modified$ZSH_THEME_GIT_PROMPT_MODIFIED "
+  fi 
 }
 
 function custom_update_remotes() {
