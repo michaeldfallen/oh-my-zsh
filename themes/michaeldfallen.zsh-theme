@@ -9,6 +9,7 @@ ZSH_THEME_GIT_PROMPT_DELETED="D "
 ZSH_THEME_GIT_PROMPT_MODIFIED="M "
 ZSH_THEME_GIT_PROMPT_UNTRACKED="U "
 ZSH_THEME_GIT_PROMPT_CONFLICTED="C "
+ZSH_THEME_GIT_PROMPT_RENAMED="R "
 
 ZSH_THEME_GIT_PROMPT_SEPARATOR="%{$FG[243]%}|%{$reset_color%}"
 
@@ -46,6 +47,7 @@ function git_files_status {
   deleted="$(echo "$statS" | grep -o "D " | wc -l | grep -oEi '[1-9][0-9]*')"
   modified="$(echo "$statS" | grep -o "M " | wc -l | grep -oEi '[1-9][0-9]*')"
   conflicted="$(echo "$statS" | grep -o "UU " | wc -l | grep -oEi '[1-9][0-9]*')"
+  renamed="$(echo "$statS" | grep -o "R " | wc -l | grep -oEi '[1-9][0-9]*')"
 
   if [ -n "$added" ]; then
     echo -n "$added$ZSH_THEME_GIT_PROMPT_ADDED"
@@ -61,6 +63,9 @@ function git_files_status {
   fi
   if [ -n "$conflicted" ]; then
     echo -n "$conflicted$ZSH_THEME_GIT_PROMPT_CONFLICTED"
+  fi
+  if [ -n "$renamed" ]; then
+    echo -n "$renamed$ZSH_THEME_GIT_PROMPT_RENAMED"
   fi
 }
 
