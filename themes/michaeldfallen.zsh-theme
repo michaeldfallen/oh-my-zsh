@@ -61,6 +61,7 @@ function git_files_status {
   fi
   if [ -n "$conflicted" ]; then
     echo -n "$conflicted$ZSH_THEME_GIT_PROMPT_CONFLICTED"
+  fi
 }
 
 function custom_update_remotes() {
