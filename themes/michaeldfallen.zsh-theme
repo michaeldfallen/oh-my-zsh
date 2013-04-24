@@ -4,10 +4,11 @@ ZSH_THEME_GIT_PROMPT_PREFIX="%{$FG[243]%}git:(%{$FG[249]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$FG[243]%})%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}✗%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[green]%}✓%{$reset_color%} "
-ZSH_THEME_GIT_PROMPT_ADDED="A"
-ZSH_THEME_GIT_PROMPT_DELETED="D"
-ZSH_THEME_GIT_PROMPT_MODIFIED="M"
-ZSH_THEME_GIT_PROMPT_UNTRACKED="U"
+ZSH_THEME_GIT_PROMPT_ADDED="A "
+ZSH_THEME_GIT_PROMPT_DELETED="D "
+ZSH_THEME_GIT_PROMPT_MODIFIED="M "
+ZSH_THEME_GIT_PROMPT_UNTRACKED="U "
+ZSH_THEME_GIT_PROMPT_CONFLICTED="C "
 
 ZSH_THEME_GIT_PROMPT_SEPARATOR="%{$FG[243]%}|%{$reset_color%}"
 
@@ -44,18 +45,22 @@ function git_files_status {
   added="$(echo "$statS" | grep -o "A " | wc -l | grep -oEi '[1-9][0-9]*')"
   deleted="$(echo "$statS" | grep -o "D " | wc -l | grep -oEi '[1-9][0-9]*')"
   modified="$(echo "$statS" | grep -o "M " | wc -l | grep -oEi '[1-9][0-9]*')"
+  conflicted="$(echo "$statS" | grep -o "UU " | wc -l | grep -oEi '[1-9][0-9]*')"
+
   if [ -n "$added" ]; then
-    echo -n "$added$ZSH_THEME_GIT_PROMPT_ADDED "
+    echo -n "$added$ZSH_THEME_GIT_PROMPT_ADDED"
   fi
   if [ -n "$untracked" ]; then 
-    echo -n "$untracked$ZSH_THEME_GIT_PROMPT_UNTRACKED "
+    echo -n "$untracked$ZSH_THEME_GIT_PROMPT_UNTRACKED"
   fi
   if [ -n "$deleted" ]; then 
-    echo -n "$deleted$ZSH_THEME_GIT_PROMPT_DELETED "
+    echo -n "$deleted$ZSH_THEME_GIT_PROMPT_DELETED"
   fi
   if [ -n "$modified" ]; then 
-    echo -n "$modified$ZSH_THEME_GIT_PROMPT_MODIFIED "
-  fi 
+    echo -n "$modified$ZSH_THEME_GIT_PROMPT_MODIFIED"
+  fi
+  if [ -n "$conflicted" ]; then
+    echo -n "$conflicted$ZSH_THEME_GIT_PROMPT_CONFLICTED"
 }
 
 function custom_update_remotes() {
