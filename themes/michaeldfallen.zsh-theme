@@ -30,11 +30,11 @@ function custom_is_git_dirty() {
 }
 
 function minutes_since_last_commit {
-    now=`date +%s`
-    last_commit=`git log --pretty=format:'%at' -1`
-    seconds_since_last_commit=$((now-last_commit))
-    minutes_since_last_commit=$((seconds_since_last_commit/60))
-    echo $minutes_since_last_commit
+  now=`date +%s`
+  last_commit=`git log --pretty=format:'%at' -1`
+  seconds_since_last_commit=$((now-last_commit))
+  minutes_since_last_commit=$((seconds_since_last_commit/60))
+  echo $minutes_since_last_commit
 }
 
 function shouldnt_you_commit {
@@ -73,67 +73,67 @@ function git_files_status {
 }
 
 function custom_update_remotes() {
-    ref=$(git symbolic-ref HEAD 2> /dev/null) || return
-    fetch_head="$(git rev-parse --show-toplevel)/.git/FETCH_HEAD"
-    if [ -f $fetch_head ]; then 
-        last_update=$(stat -f %m $fetch_head)
+  ref=$(git symbolic-ref HEAD 2> /dev/null) || return
+  fetch_head="$(git rev-parse --show-toplevel)/.git/FETCH_HEAD"
+  if [ -f $fetch_head ]; then 
+    last_update=$(stat -f %m $fetch_head)
         
-        secs=$(date -u +%s)
-    	if [[ $(($secs - $last_update)) -gt "360" ]] ; then 
-	    (nohup git fetch --prune > /dev/null &) 2> /dev/null
-    	fi
-    else
-        (nohup git fetch --prune > /dev/null &) 2> /dev/null
-    fi
+    secs=$(date -u +%s)
+  if [[ $(($secs - $last_update)) -gt "360" ]] ; then 
+	  (nohup git fetch --prune > /dev/null &) 2> /dev/null
+  fi
+  else
+    (nohup git fetch --prune > /dev/null &) 2> /dev/null
+  fi
 }
 
 function custom_git_remote_vs_master_status() {
-    # get the tracking-branch name and masters name
-    master=$(git for-each-ref --format='%(upstream:short)' | grep $ZSH_GIT_MASTER_BRANCH)
-    remote=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
+  # get the tracking-branch name and masters name
+  master=$(git for-each-ref --format='%(upstream:short)' | grep $ZSH_GIT_MASTER_BRANCH)
+  remote=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
     
-    if [[ -n ${remote} ]] ; then
-    	# creates global variables $1 and $2 based on left vs. right tracking
-    	# inspired by @adam_spiers
-    	set -- $(git rev-list --left-right --count $master...$remote)
-    	behind=$1
-    	ahead=$2
+  if [[ -n ${remote} ]] ; then
+    # creates global variables $1 and $2 based on left vs. right tracking
+    # inspired by @adam_spiers
+    set -- $(git rev-list --left-right --count $master...$remote)
+    behind=$1
+    ahead=$2
 
-        if [ $ahead -eq 0 ] && [ $behind -gt 0 ]
-        then
-            echo "%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE$ZSH_THEME_GIT_PROMPT_SEPARATOR"
-        elif [ $ahead -gt 0 ] && [ $behind -eq 0 ]
-        then
-            echo "%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE$ZSH_THEME_GIT_PROMPT_SEPARATOR"
-        elif [ $ahead -gt 0 ] && [ $behind -gt 0 ]
-        then
-            echo "%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE$ZSH_THEME_GIT_PROMPT_SEPARATOR"
-        fi
+    if [ $ahead -eq 0 ] && [ $behind -gt 0 ]
+    then
+      echo "%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE$ZSH_THEME_GIT_PROMPT_SEPARATOR"
+    elif [ $ahead -gt 0 ] && [ $behind -eq 0 ]
+    then
+      echo "%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE$ZSH_THEME_GIT_PROMPT_SEPARATOR"
+    elif [ $ahead -gt 0 ] && [ $behind -gt 0 ]
+    then
+      echo "%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE$ZSH_THEME_GIT_PROMPT_SEPARATOR"
     fi
+  fi
 }
 
 function custom_git_remote_status() {
-    # get the tracking-branch name
-    remote=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
+  # get the tracking-branch name
+  remote=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
     
-    if [[ -n ${remote} ]] ; then
-    	# creates global variables $1 and $2 based on left vs. right tracking
-    	# inspired by @adam_spiers
-    	set -- $(git rev-list --left-right --count $remote...HEAD)
-    	behind=$1
-    	ahead=$2
+  if [[ -n ${remote} ]] ; then
+    # creates global variables $1 and $2 based on left vs. right tracking
+    # inspired by @adam_spiers
+    set -- $(git rev-list --left-right --count $remote...HEAD)
+    behind=$1
+    ahead=$2
 
-        if [ $ahead -eq 0 ] && [ $behind -gt 0 ]
-        then
-            echo "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE"
-        elif [ $ahead -gt 0 ] && [ $behind -eq 0 ]
-        then
-            echo "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE"
-        elif [ $ahead -gt 0 ] && [ $behind -gt 0 ]
-        then
-            echo "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE"
-        fi
+    if [ $ahead -eq 0 ] && [ $behind -gt 0 ]
+    then
+      echo "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE"
+    elif [ $ahead -gt 0 ] && [ $behind -eq 0 ]
+    then
+      echo "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE"
+    elif [ $ahead -gt 0 ] && [ $behind -gt 0 ]
+    then
+      echo "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE"
     fi
+  fi
 }
 
 function custom_git_prompt_info() {
