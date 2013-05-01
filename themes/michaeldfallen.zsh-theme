@@ -1,6 +1,7 @@
 PROMPT='$(custom_update_remotes)%{$fg_bold[red]%}➜%{$fg_bold[green]%}%p %{$fg[cyan]%}%c $(custom_git_prompt_info)%{$fg_bold[blue]%}% %{$reset_color%}'
 
-ZSH_THEME_GIT_PROMPT_PREFIX="%{$FG[243]%}git:(%{$FG[249]%}"
+ZSH_THEME_GIT_PROMPT_PREFIX="%{$FG[243]%}git:(%{$reset_color%}"
+ZSH_THEME_GIT_BRANCH_PREFIX="%{$FG[249]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$FG[243]%})%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}✗%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[green]%}✓%{$reset_color%} "
@@ -10,6 +11,8 @@ ZSH_THEME_GIT_PROMPT_MODIFIED="M "
 ZSH_THEME_GIT_PROMPT_UNTRACKED="U "
 ZSH_THEME_GIT_PROMPT_CONFLICTED="C "
 ZSH_THEME_GIT_PROMPT_RENAMED="R "
+
+ZSH_GIT_MASTER_BRANCH="master"
 
 ZSH_THEME_GIT_PROMPT_SEPARATOR="%{$FG[243]%}|%{$reset_color%}"
 
@@ -84,6 +87,31 @@ function custom_update_remotes() {
     fi
 }
 
+function custom_git_remote_vs_master_status() {
+    # get the tracking-branch name and masters name
+    master=$(git for-each-ref --format='%(upstream:short)' | grep $ZSH_GIT_MASTER_BRANCH)
+    remote=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
+    
+    if [[ -n ${remote} ]] ; then
+    	# creates global variables $1 and $2 based on left vs. right tracking
+    	# inspired by @adam_spiers
+    	set -- $(git rev-list --left-right --count $master...$remote)
+    	behind=$1
+    	ahead=$2
+
+        if [ $ahead -eq 0 ] && [ $behind -gt 0 ]
+        then
+            echo "%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE$ZSH_THEME_GIT_PROMPT_SEPARATOR"
+        elif [ $ahead -gt 0 ] && [ $behind -eq 0 ]
+        then
+            echo "%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE$ZSH_THEME_GIT_PROMPT_SEPARATOR"
+        elif [ $ahead -gt 0 ] && [ $behind -gt 0 ]
+        then
+            echo "%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE$ZSH_THEME_GIT_PROMPT_SEPARATOR"
+        fi
+    fi
+}
+
 function custom_git_remote_status() {
     # get the tracking-branch name
     remote=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
@@ -110,5 +138,5 @@ function custom_git_remote_status() {
 
 function custom_git_prompt_info() {
   ref=$(git symbolic-ref HEAD 2> /dev/null) || return
-  echo "$ZSH_THEME_GIT_PROMPT_PREFIX${ref#refs/heads/}$(custom_git_remote_status)${ZSH_THEME_GIT_PROMPT_SUFFIX}$(git_files_status)$(parse_git_dirty)"
+  echo "$ZSH_THEME_GIT_PROMPT_PREFIX$(custom_git_remote_vs_master_status)$ZSH_THEME_GIT_BRANCH_PREFIX${ref#refs/heads/}$(custom_git_remote_status)${ZSH_THEME_GIT_PROMPT_SUFFIX}$(git_files_status)$(parse_git_dirty)"
 }
