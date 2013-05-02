@@ -101,13 +101,13 @@ function custom_git_remote_vs_master_status() {
 
     if [ $ahead -eq 0 ] && [ $behind -gt 0 ]
     then
-      echo "%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE$ZSH_THEME_GIT_PROMPT_SEPARATOR"
+      echo "𝘮 ⤻ %{$FG[255]%}$behind%{$reset_color%}⃕⃕⃕⃕⃕⃕⃕$ZSH_THEME_GIT_PROMPT_SEPARATOR"
     elif [ $ahead -gt 0 ] && [ $behind -eq 0 ]
     then
-      echo "%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE$ZSH_THEME_GIT_PROMPT_SEPARATOR"
+      echo "𝘮 ⤺ %{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_SEPARATOR"
     elif [ $ahead -gt 0 ] && [ $behind -gt 0 ]
     then
-      echo "%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE$ZSH_THEME_GIT_PROMPT_SEPARATOR"
+      echo "𝘮 %{$FG[255]%}$behind%{$reset_color%}⇆%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_SEPARATOR"
     fi
   fi
 }
