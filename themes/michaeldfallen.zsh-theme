@@ -11,6 +11,7 @@ ZSH_THEME_GIT_PROMPT_MODIFIED="M "
 ZSH_THEME_GIT_PROMPT_UNTRACKED="U "
 ZSH_THEME_GIT_PROMPT_CONFLICTED="C "
 ZSH_THEME_GIT_PROMPT_RENAMED="R "
+ZSH_THEME_GIT_PROMPT_MASTER="${ZSH_THEME_GIT_BRANCH_PREFIX}𝘮 %{$reset_color%}" 
 
 ZSH_GIT_MASTER_BRANCH="master"
 
@@ -95,19 +96,20 @@ function custom_git_remote_vs_master_status() {
   if [[ -n ${remote} ]] ; then
     # creates global variables $1 and $2 based on left vs. right tracking
     # inspired by @adam_spiers
+    set --
     set -- $(git rev-list --left-right --count $master...$remote)
-    behind=$1
-    ahead=$2
+    master_behind=$1
+    master_ahead=$2
 
-    if [ $ahead -eq 0 ] && [ $behind -gt 0 ]
+    if [ $master_ahead -eq 0 ] && [ $master_behind -gt 0 ]
     then
-      echo "𝘮 ⤻ %{$FG[255]%}$behind%{$reset_color%}⃕⃕⃕⃕⃕⃕⃕$ZSH_THEME_GIT_PROMPT_SEPARATOR"
-    elif [ $ahead -gt 0 ] && [ $behind -eq 0 ]
+      echo -e "$ZSH_THEME_GIT_PROMPT_MASTER%{$FG[255]%}$master_behind%{$reset_color%}⃕⃕⃕⃕⃕⃕⃕\xe2\xa4\xbb "
+    elif [ $master_ahead -gt 0 ] && [ $master_behind -eq 0 ]
     then
-      echo "𝘮 ⤺ %{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_SEPARATOR"
-    elif [ $ahead -gt 0 ] && [ $behind -gt 0 ]
+      echo -e "$ZSH_THEME_GIT_PROMPT_MASTER\xe2\xa4\xba %{$FG[255]%}$master_ahead%{$reset_color%} "
+    elif [ $master_ahead -gt 0 ] && [ $master_behind -gt 0 ]
     then
-      echo "𝘮 %{$FG[255]%}$behind%{$reset_color%}⇆%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_SEPARATOR"
+      echo -e "$ZSH_THEME_GIT_PROMPT_MASTER%{$FG[255]%}$master_behind%{$reset_color%}\xe2\x87\x86%{$FG[255]%}$master_ahead%{$reset_color%} "
     fi
   fi
 }
@@ -119,6 +121,7 @@ function custom_git_remote_status() {
   if [[ -n ${remote} ]] ; then
     # creates global variables $1 and $2 based on left vs. right tracking
     # inspired by @adam_spiers
+    set --
     set -- $(git rev-list --left-right --count $remote...HEAD)
     behind=$1
     ahead=$2
