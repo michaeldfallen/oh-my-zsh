@@ -16,9 +16,9 @@ ZSH_THEME_GIT_PROMPT_MASTER="${ZSH_THEME_GIT_BRANCH_PREFIX}𝘮 %{$reset_color%}
 ZSH_GIT_MASTER_BRANCH="master"
 
 ZSH_THEME_GIT_PROMPT_SEPARATOR="%{$FG[243]%}|%{$reset_color%}"
-ZSH_THEME_GIT_REMOTE_DIVERGED_MASTER="%{$FG[220]%} \xe2\x86\x94 %{$reset_color%}"
+ZSH_THEME_GIT_REMOTE_DIVERGED_MASTER="%{$FG[220]%}\xe2\x87\x86%{$reset_color%}"
 ZSH_THEME_GIT_REMOTE_BEHIND_MASTER="%{$FG[039]%} \xe2\x86\x92 %{$reset_color%}"
-ZSH_THEME_GIT_REMOTE_AHEAD_MASTER="%{$FG[166]%} \xe2\x86\x90 %{$reset_color%}"
+ZSH_THEME_GIT_REMOTE_AHEAD_MASTER="%{$FG[166]%}\xe2\x86\x90 %{$reset_color%}"
 #ZSH_THEME_GIT_REMOTE_DIVERGED_MASTER="%{$FG[220]%}\xe2\x87\x86%{$reset_color%}"
 #ZSH_THEME_GIT_REMOTE_BEHIND_MASTER="%{$FG[039]%}\xe2\xa4\xbb %{$reset_color%}"
 #ZSH_THEME_GIT_REMOTE_AHEAD_MASTER="%{$FG[166]%}\xe2\xa4\xba %{$reset_color%}"
