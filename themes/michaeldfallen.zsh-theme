@@ -16,7 +16,12 @@ ZSH_THEME_GIT_PROMPT_MASTER="${ZSH_THEME_GIT_BRANCH_PREFIX}𝘮 %{$reset_color%}
 ZSH_GIT_MASTER_BRANCH="master"
 
 ZSH_THEME_GIT_PROMPT_SEPARATOR="%{$FG[243]%}|%{$reset_color%}"
-
+ZSH_THEME_GIT_REMOTE_DIVERGED_MASTER="%{$FG[220]%} \xe2\x86\x94 %{$reset_color%}"
+ZSH_THEME_GIT_REMOTE_BEHIND_MASTER="%{$FG[039]%} \xe2\x86\x92 %{$reset_color%}"
+ZSH_THEME_GIT_REMOTE_AHEAD_MASTER="%{$FG[166]%} \xe2\x86\x90 %{$reset_color%}"
+#ZSH_THEME_GIT_REMOTE_DIVERGED_MASTER="%{$FG[220]%}\xe2\x87\x86%{$reset_color%}"
+#ZSH_THEME_GIT_REMOTE_BEHIND_MASTER="%{$FG[039]%}\xe2\xa4\xbb %{$reset_color%}"
+#ZSH_THEME_GIT_REMOTE_AHEAD_MASTER="%{$FG[166]%}\xe2\xa4\xba %{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE="%{$FG[039]%}↓%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE="%{$FG[166]%}↑%{$reset_color%}"
 
@@ -100,16 +105,15 @@ function custom_git_remote_vs_master_status() {
     set -- $(git rev-list --left-right --count $master...$remote)
     master_behind=$1
     master_ahead=$2
-
     if [ $master_ahead -eq 0 ] && [ $master_behind -gt 0 ]
     then
-      echo -e "$ZSH_THEME_GIT_PROMPT_MASTER%{$FG[255]%}$master_behind%{$reset_color%}⃕⃕⃕⃕⃕⃕⃕\xe2\xa4\xbb "
+      echo -e "$ZSH_THEME_GIT_PROMPT_MASTER%{$FG[255]%}$master_behind%{$reset_color%}$ZSH_THEME_GIT_REMOTE_BEHIND_MASTER"
     elif [ $master_ahead -gt 0 ] && [ $master_behind -eq 0 ]
     then
-      echo -e "$ZSH_THEME_GIT_PROMPT_MASTER\xe2\xa4\xba %{$FG[255]%}$master_ahead%{$reset_color%} "
+      echo -e "$ZSH_THEME_GIT_PROMPT_MASTER$ZSH_THEME_GIT_REMOTE_AHEAD_MASTER%{$FG[255]%}$master_ahead%{$reset_color%} "
     elif [ $master_ahead -gt 0 ] && [ $master_behind -gt 0 ]
     then
-      echo -e "$ZSH_THEME_GIT_PROMPT_MASTER%{$FG[255]%}$master_behind%{$reset_color%}\xe2\x87\x86%{$FG[255]%}$master_ahead%{$reset_color%} "
+      echo -e "$ZSH_THEME_GIT_PROMPT_MASTER%{$FG[255]%}$master_behind%{$reset_color%}$ZSH_THEME_GIT_REMOTE_DIVERGED_MASTER%{$FG[255]%}$master_ahead%{$reset_color%} "
     fi
   fi
 }
@@ -125,7 +129,7 @@ function custom_git_remote_status() {
     set -- $(git rev-list --left-right --count $remote...HEAD)
     behind=$1
     ahead=$2
-
+    
     if [ $ahead -eq 0 ] && [ $behind -gt 0 ]
     then
       echo "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE"
