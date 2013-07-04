@@ -5,6 +5,7 @@ ZSH_THEME_GIT_BRANCH_PREFIX="%{$FG[249]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$FG[243]%})%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}✗%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[green]%}✓%{$reset_color%} "
+ZSH_THEME_GIT_PROMPT_NOT_TRACKING="%{$fg[red]%}⌁%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_ADDED="A "
 ZSH_THEME_GIT_PROMPT_DELETED="D "
 ZSH_THEME_GIT_PROMPT_MODIFIED="M "
@@ -19,13 +20,8 @@ ZSH_THEME_GIT_PROMPT_SEPARATOR="%{$FG[243]%}|%{$reset_color%}"
 ZSH_THEME_GIT_REMOTE_DIVERGED_MASTER="%{$FG[220]%}\xe2\x87\x86%{$reset_color%}"
 ZSH_THEME_GIT_REMOTE_BEHIND_MASTER="%{$FG[039]%} \xe2\x86\x92 %{$reset_color%}"
 ZSH_THEME_GIT_REMOTE_AHEAD_MASTER="%{$FG[166]%}\xe2\x86\x90 %{$reset_color%}"
-#ZSH_THEME_GIT_REMOTE_DIVERGED_MASTER="%{$FG[220]%}\xe2\x87\x86%{$reset_color%}"
-#ZSH_THEME_GIT_REMOTE_BEHIND_MASTER="%{$FG[039]%}\xe2\xa4\xbb %{$reset_color%}"
-#ZSH_THEME_GIT_REMOTE_AHEAD_MASTER="%{$FG[166]%}\xe2\xa4\xba %{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE="%{$FG[039]%}↓%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE="%{$FG[166]%}↑%{$reset_color%}"
-
-alias git-graph='git log --graph --color --all --pretty=format:"%C(yellow)%H%C(green)%d%C(reset)%n%x20%cd%n%x20%cn%x20(%ce)%n%x20%s%n"'
 
 function custom_is_git_dirty() {
   if [ -n "$(git ls-files --others --exclude-standard)" ]; then
@@ -94,17 +90,17 @@ function custom_update_remotes() {
 }
 
 function custom_git_remote_vs_master_status() {
-  # get the tracking-branch name and masters name
-  master=$(git for-each-ref --format='%(upstream:short)' | grep $ZSH_GIT_MASTER_BRANCH)
-  remote=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
-    
-  if [[ -n ${remote} ]] ; then
+  remote=$1
+  master=$2
+
+  if [[ -n $remote ]] && [[ -n $master ]] ; then
     # creates global variables $1 and $2 based on left vs. right tracking
     # inspired by @adam_spiers
     set --
     set -- $(git rev-list --left-right --count $master...$remote)
     master_behind=$1
     master_ahead=$2
+    set --
     if [ $master_ahead -eq 0 ] && [ $master_behind -gt 0 ]
     then
       echo -e "$ZSH_THEME_GIT_PROMPT_MASTER%{$FG[255]%}$master_behind%{$reset_color%}$ZSH_THEME_GIT_REMOTE_BEHIND_MASTER"
@@ -115,20 +111,22 @@ function custom_git_remote_vs_master_status() {
     then
       echo -e "$ZSH_THEME_GIT_PROMPT_MASTER%{$FG[255]%}$master_behind%{$reset_color%}$ZSH_THEME_GIT_REMOTE_DIVERGED_MASTER%{$FG[255]%}$master_ahead%{$reset_color%} "
     fi
+  else 
+    echo -e "$ZSH_THEME_GIT_PROMPT_MASTER$ZSH_THEME_GIT_PROMPT_NOT_TRACKING "
   fi
 }
 
 function custom_git_remote_status() {
-  # get the tracking-branch name
-  remote=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
-    
-  if [[ -n ${remote} ]] ; then
+  remote=$1
+  
+  if [[ -n $remote ]] ; then
     # creates global variables $1 and $2 based on left vs. right tracking
     # inspired by @adam_spiers
     set --
     set -- $(git rev-list --left-right --count $remote...HEAD)
     behind=$1
     ahead=$2
+    set --
     
     if [ $ahead -eq 0 ] && [ $behind -gt 0 ]
     then
@@ -143,7 +141,24 @@ function custom_git_remote_status() {
   fi
 }
 
+function git_this_branch() {
+  remote=$(git for-each-ref --format='%(refname:short)' $(git symbolic-ref -q HEAD))
+  echo $remote
+}
+
+alias git-graph='git log --graph --color --all --pretty=format:"%C(yellow)%H%C(green)%d%C(reset)%n%x20%cd%n%x20%cn%x20(%ce)%n%x20%s%n"'
+
 function custom_git_prompt_info() {
   ref=$(git symbolic-ref HEAD 2> /dev/null) || return
-  echo "$ZSH_THEME_GIT_PROMPT_PREFIX$(custom_git_remote_vs_master_status)$ZSH_THEME_GIT_BRANCH_PREFIX${ref#refs/heads/}$(custom_git_remote_status)${ZSH_THEME_GIT_PROMPT_SUFFIX}$(git_files_status)$(parse_git_dirty)"
+
+  master=$(git for-each-ref --format='%(upstream:short)' | grep $ZSH_GIT_MASTER_BRANCH)
+  remote=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
+  
+  echo -n "$ZSH_THEME_GIT_PROMPT_PREFIX"
+  echo -n "$(custom_git_remote_vs_master_status $remote $master)"
+  echo -n "$ZSH_THEME_GIT_BRANCH_PREFIX${ref#refs/heads/}"
+  echo -n "$(custom_git_remote_status $remote)"
+  echo -n "${ZSH_THEME_GIT_PROMPT_SUFFIX}"
+  echo -n "$(git_files_status)"
+  echo -n "$(parse_git_dirty)"
 }
