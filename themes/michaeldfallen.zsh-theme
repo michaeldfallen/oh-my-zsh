@@ -23,6 +23,22 @@ ZSH_THEME_GIT_REMOTE_AHEAD_MASTER="%{$FG[166]%}\xe2\x86\x90 %{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE="%{$FG[039]%}↓%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE="%{$FG[166]%}↑%{$reset_color%}"
 
+function tracking() {
+  echo tracking $ZSH_GIT_MASTER_BRANCH
+}
+
+function track() {
+  branch=$1
+  if [[ -n $branch ]]; then 
+    export ZSH_GIT_MASTER_BRANCH="$branch"
+  fi
+  tracking
+}
+
+function resettracking() {
+  track master
+}
+
 function custom_is_git_dirty() {
   if [ -n "$(git ls-files --others --exclude-standard)" ]; then
     echo "untracked" 
@@ -44,6 +60,36 @@ function shouldnt_you_commit {
     echo "|%{$fg[234]%}ಠ_ಠ%{$reset_color%}"
   fi
 }
+
+function git_staged_status {
+  status=$1
+  modified="$(echo "$status" | grep -p "M[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
+  added="$(echo "$status" | grep -p "A[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
+  deleted="$(echo "$status" | grep -p "D[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
+  renamed="$(echo "$status" | grep -p "R[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
+  conflicted="$(echo "$status" | grep -p "U[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
+
+}
+
+function git_unstaged_status {
+  status=$1
+  modified="$(echo "$status" | grep -p "[A|M|C|D|U|R ]M " | wc -l | grep -oEi '[1-9][0-9]*')"
+  added="$(echo "$status" | grep -p "[A|M|C|D|U|R ]A " | wc -l | grep -oEi '[1-9][0-9]*')"
+  deleted="$(echo "$status" | grep -p "[A|M|C|D|U|R ]D " | wc -l | grep -oEi '[1-9][0-9]*')"
+  renamed="$(echo "$status" | grep -p "[A|M|C|D|U|R ]R " | wc -l | grep -oEi '[1-9][0-9]*')"
+  conflicted="$(echo "$status" | grep -p "[A|M|C|D|U|R ]U " | wc -l | grep -oEi '[1-9][0-9]*')" 
+
+}
+
+function git_untracked_status {
+  status=$1
+  untracked="$(echo "$status" | grep -p "?? " | wc -l | grep -oEi '[1-9][0-9]*')" 
+  
+}
+
+function git_detailed_files_status {
+  echo -n "$(git_staged_status)|$(git_unstaged_status)|$(git_untracked_status)"
+} 
 
 function git_files_status {
   statS=$(git status --porcelain 2>/dev/null)
@@ -146,7 +192,6 @@ function git_this_branch() {
   echo $remote
 }
 
-alias git-graph='git log --graph --color --all --pretty=format:"%C(yellow)%H%C(green)%d%C(reset)%n%x20%cd%n%x20%cn%x20(%ce)%n%x20%s%n"'
 
 function custom_git_prompt_info() {
   ref=$(git symbolic-ref HEAD 2> /dev/null) || return
