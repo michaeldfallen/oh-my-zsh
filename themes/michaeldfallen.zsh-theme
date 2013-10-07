@@ -74,19 +74,19 @@ function git_staged_status {
   conflicted="$(echo "$gitStatus" | grep -p "U[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
 
   if [ -n "$added" ]; then
-    echo -n " $added$ZSH_THEME_GIT_PROMPT_ADDED"
+    echo -n "$added$ZSH_THEME_GIT_PROMPT_ADDED"
   fi
   if [ -n "$deleted" ]; then 
-    echo -n " $deleted$ZSH_THEME_GIT_PROMPT_DELETED"
+    echo -n "$deleted$ZSH_THEME_GIT_PROMPT_DELETED"
   fi
   if [ -n "$modified" ]; then 
-    echo -n " $modified$ZSH_THEME_GIT_PROMPT_MODIFIED"
+    echo -n "$modified$ZSH_THEME_GIT_PROMPT_MODIFIED"
   fi
   if [ -n "$conflicted" ]; then
-    echo -n " $conflicted$ZSH_THEME_GIT_PROMPT_CONFLICTED"
+    echo -n "$conflicted$ZSH_THEME_GIT_PROMPT_CONFLICTED"
   fi
   if [ -n "$renamed" ]; then
-    echo -n " $renamed$ZSH_THEME_GIT_PROMPT_RENAMED"
+    echo -n "$renamed$ZSH_THEME_GIT_PROMPT_RENAMED"
   fi
 }
 
@@ -99,19 +99,19 @@ function git_unstaged_status {
   conflicted="$(echo "$gitStatus" | grep -p "[A|M|C|D|U|R ]U " | wc -l | grep -oEi '[1-9][0-9]*')" 
 
   if [ -n "$added" ]; then
-    echo -n " $added$ZSH_THEME_GIT_PROMPT_ADDED"
+    echo -n "$added$ZSH_THEME_GIT_PROMPT_ADDED"
   fi
   if [ -n "$deleted" ]; then 
-    echo -n " $deleted$ZSH_THEME_GIT_PROMPT_DELETED"
+    echo -n "$deleted$ZSH_THEME_GIT_PROMPT_DELETED"
   fi
   if [ -n "$modified" ]; then 
-    echo -n " $modified$ZSH_THEME_GIT_PROMPT_MODIFIED"
+    echo -n "$modified$ZSH_THEME_GIT_PROMPT_MODIFIED"
   fi
   if [ -n "$conflicted" ]; then
-    echo -n " $conflicted$ZSH_THEME_GIT_PROMPT_CONFLICTED"
+    echo -n "$conflicted$ZSH_THEME_GIT_PROMPT_CONFLICTED"
   fi
   if [ -n "$renamed" ]; then
-    echo -n " $renamed$ZSH_THEME_GIT_PROMPT_RENAMED"
+    echo -n "$renamed$ZSH_THEME_GIT_PROMPT_RENAMED"
   fi
 }
 
@@ -120,15 +120,23 @@ function git_untracked_status {
   untracked="$(echo "$gitStatus" | grep -p "?? " | wc -l | grep -oEi '[1-9][0-9]*')" 
  
   if [ -n "$untracked" ]; then
-    echo -n " $untracked$ZSH_THEME_GIT_PROMPT_UNTRACKED"
+    echo -n "$untracked$ZSH_THEME_GIT_PROMPT_UNTRACKED"
   fi
 }
 
 function git_files_status {
   statS=$(git status --porcelain 2>/dev/null)
-  echo -n "$ZSH_THEME_GIT_PROMPT_STAGED_COLOR$(git_staged_status $statS)$ZSH_THEME_RESET_COLOR"
-  echo -n "$ZSH_THEME_GIT_PROMPT_UNSTAGED_COLOR$(git_unstaged_status $statS)$ZSH_THEME_RESET_COLOR"
-  echo -n "$ZSH_THEME_GIT_PROMPT_UNTRACKED_COLOR$(git_untracked_status $statS)$ZSH_THEME_RESET_COLOR"
+  stagedChanges="$(git_staged_status $statS)"
+  unstagedChanges="$(git_unstaged_status $statS)"
+  untrackedChanges="$(git_untracked_status $statS)"
+  changes="$stagedChanges$unstagedChanges$untrackedChanges"
+  if [ -n "$changes" ]; then
+    echo -n "$ZSH_THEME_GIT_PROMPT_SEPARATOR"
+
+    echo -n "$ZSH_THEME_GIT_PROMPT_STAGED_COLOR$stagedChanges$ZSH_THEME_RESET_COLOR"
+    echo -n "$ZSH_THEME_GIT_PROMPT_UNSTAGED_COLOR$unstagedChanges$ZSH_THEME_RESET_COLOR"
+    echo -n "$ZSH_THEME_GIT_PROMPT_UNTRACKED_COLOR$untrackedChanges$ZSH_THEME_RESET_COLOR"
+  fi
 }
 
 function custom_update_remotes() {
