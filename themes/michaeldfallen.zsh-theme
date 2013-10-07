@@ -1,17 +1,21 @@
 PROMPT='$(custom_update_remotes)%{$fg_bold[red]%}➜%{$fg_bold[green]%}%p %{$fg[cyan]%}%c $(custom_git_prompt_info)%{$fg_bold[blue]%}% %{$reset_color%}'
 
+ZSH_THEME_RESET_COLOR="%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_PREFIX="%{$FG[243]%}git:(%{$reset_color%}"
 ZSH_THEME_GIT_BRANCH_PREFIX="%{$FG[249]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$FG[243]%})%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}✗%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[green]%}✓%{$reset_color%} "
+ZSH_THEME_GIT_PROMPT_UNSTAGED_COLOR="%{$FG[203]%}"
+ZSH_THEME_GIT_PROMPT_STAGED_COLOR="%{$FG[155]%}"
+ZSH_THEME_GIT_PROMPT_UNTRACKED_COLOR="%{$FG[252]%}"
 ZSH_THEME_GIT_PROMPT_NOT_TRACKING="%{$FG[220]%}⌁%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_ADDED="A "
-ZSH_THEME_GIT_PROMPT_DELETED="D "
-ZSH_THEME_GIT_PROMPT_MODIFIED="M "
-ZSH_THEME_GIT_PROMPT_UNTRACKED="U "
-ZSH_THEME_GIT_PROMPT_CONFLICTED="C "
-ZSH_THEME_GIT_PROMPT_RENAMED="R "
+ZSH_THEME_GIT_PROMPT_ADDED="A"
+ZSH_THEME_GIT_PROMPT_DELETED="D"
+ZSH_THEME_GIT_PROMPT_MODIFIED="M"
+ZSH_THEME_GIT_PROMPT_UNTRACKED="U"
+ZSH_THEME_GIT_PROMPT_CONFLICTED="C"
+ZSH_THEME_GIT_PROMPT_RENAMED="R"
 ZSH_THEME_GIT_PROMPT_MASTER="${ZSH_THEME_GIT_BRANCH_PREFIX}𝘮 %{$reset_color%}" 
 
 ZSH_GIT_MASTER_BRANCH="master"
@@ -62,62 +66,69 @@ function shouldnt_you_commit {
 }
 
 function git_staged_status {
-  status=$1
-  modified="$(echo "$status" | grep -p "M[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
-  added="$(echo "$status" | grep -p "A[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
-  deleted="$(echo "$status" | grep -p "D[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
-  renamed="$(echo "$status" | grep -p "R[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
-  conflicted="$(echo "$status" | grep -p "U[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
+  gitStatus=$1
+  modified="$(echo "$gitStatus" | grep -p "M[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
+  added="$(echo "$gitStatus" | grep -p "A[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
+  deleted="$(echo "$gitStatus" | grep -p "D[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
+  renamed="$(echo "$gitStatus" | grep -p "R[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
+  conflicted="$(echo "$gitStatus" | grep -p "U[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
 
+  if [ -n "$added" ]; then
+    echo -n " $added$ZSH_THEME_GIT_PROMPT_ADDED"
+  fi
+  if [ -n "$deleted" ]; then 
+    echo -n " $deleted$ZSH_THEME_GIT_PROMPT_DELETED"
+  fi
+  if [ -n "$modified" ]; then 
+    echo -n " $modified$ZSH_THEME_GIT_PROMPT_MODIFIED"
+  fi
+  if [ -n "$conflicted" ]; then
+    echo -n " $conflicted$ZSH_THEME_GIT_PROMPT_CONFLICTED"
+  fi
+  if [ -n "$renamed" ]; then
+    echo -n " $renamed$ZSH_THEME_GIT_PROMPT_RENAMED"
+  fi
 }
 
 function git_unstaged_status {
-  status=$1
-  modified="$(echo "$status" | grep -p "[A|M|C|D|U|R ]M " | wc -l | grep -oEi '[1-9][0-9]*')"
-  added="$(echo "$status" | grep -p "[A|M|C|D|U|R ]A " | wc -l | grep -oEi '[1-9][0-9]*')"
-  deleted="$(echo "$status" | grep -p "[A|M|C|D|U|R ]D " | wc -l | grep -oEi '[1-9][0-9]*')"
-  renamed="$(echo "$status" | grep -p "[A|M|C|D|U|R ]R " | wc -l | grep -oEi '[1-9][0-9]*')"
-  conflicted="$(echo "$status" | grep -p "[A|M|C|D|U|R ]U " | wc -l | grep -oEi '[1-9][0-9]*')" 
+  gitStatus=$1
+  modified="$(echo "$gitStatus" | grep -p "[A|M|C|D|U|R ]M " | wc -l | grep -oEi '[1-9][0-9]*')"
+  added="$(echo "$gitStatus" | grep -p "[A|M|C|D|U|R ]A " | wc -l | grep -oEi '[1-9][0-9]*')"
+  deleted="$(echo "$gitStatus" | grep -p "[A|M|C|D|U|R ]D " | wc -l | grep -oEi '[1-9][0-9]*')"
+  renamed="$(echo "$gitStatus" | grep -p "[A|M|C|D|U|R ]R " | wc -l | grep -oEi '[1-9][0-9]*')"
+  conflicted="$(echo "$gitStatus" | grep -p "[A|M|C|D|U|R ]U " | wc -l | grep -oEi '[1-9][0-9]*')" 
 
+  if [ -n "$added" ]; then
+    echo -n " $added$ZSH_THEME_GIT_PROMPT_ADDED"
+  fi
+  if [ -n "$deleted" ]; then 
+    echo -n " $deleted$ZSH_THEME_GIT_PROMPT_DELETED"
+  fi
+  if [ -n "$modified" ]; then 
+    echo -n " $modified$ZSH_THEME_GIT_PROMPT_MODIFIED"
+  fi
+  if [ -n "$conflicted" ]; then
+    echo -n " $conflicted$ZSH_THEME_GIT_PROMPT_CONFLICTED"
+  fi
+  if [ -n "$renamed" ]; then
+    echo -n " $renamed$ZSH_THEME_GIT_PROMPT_RENAMED"
+  fi
 }
 
 function git_untracked_status {
-  status=$1
-  untracked="$(echo "$status" | grep -p "?? " | wc -l | grep -oEi '[1-9][0-9]*')" 
-  
+  gitStatus=$1
+  untracked="$(echo "$gitStatus" | grep -p "?? " | wc -l | grep -oEi '[1-9][0-9]*')" 
+ 
+  if [ -n "$untracked" ]; then
+    echo -n " $untracked$ZSH_THEME_GIT_PROMPT_UNTRACKED"
+  fi
 }
-
-function git_detailed_files_status {
-  echo -n "$(git_staged_status)|$(git_unstaged_status)|$(git_untracked_status)"
-} 
 
 function git_files_status {
   statS=$(git status --porcelain 2>/dev/null)
-  untracked="$(echo "$statS" | grep -o "?? " | wc -l | grep -oEi '[1-9][0-9]*')"
-  added="$(echo "$statS" | grep -o "A " | wc -l | grep -oEi '[1-9][0-9]*')"
-  deleted="$(echo "$statS" | grep -o "D " | wc -l | grep -oEi '[1-9][0-9]*')"
-  modified="$(echo "$statS" | grep -o "M " | wc -l | grep -oEi '[1-9][0-9]*')"
-  conflicted="$(echo "$statS" | grep -o "UU " | wc -l | grep -oEi '[1-9][0-9]*')"
-  renamed="$(echo "$statS" | grep -o "R " | wc -l | grep -oEi '[1-9][0-9]*')"
-
-  if [ -n "$added" ]; then
-    echo -n "$added$ZSH_THEME_GIT_PROMPT_ADDED"
-  fi
-  if [ -n "$untracked" ]; then 
-    echo -n "$untracked$ZSH_THEME_GIT_PROMPT_UNTRACKED"
-  fi
-  if [ -n "$deleted" ]; then 
-    echo -n "$deleted$ZSH_THEME_GIT_PROMPT_DELETED"
-  fi
-  if [ -n "$modified" ]; then 
-    echo -n "$modified$ZSH_THEME_GIT_PROMPT_MODIFIED"
-  fi
-  if [ -n "$conflicted" ]; then
-    echo -n "$conflicted$ZSH_THEME_GIT_PROMPT_CONFLICTED"
-  fi
-  if [ -n "$renamed" ]; then
-    echo -n "$renamed$ZSH_THEME_GIT_PROMPT_RENAMED"
-  fi
+  echo -n "$ZSH_THEME_GIT_PROMPT_STAGED_COLOR$(git_staged_status $statS)$ZSH_THEME_RESET_COLOR"
+  echo -n "$ZSH_THEME_GIT_PROMPT_UNSTAGED_COLOR$(git_unstaged_status $statS)$ZSH_THEME_RESET_COLOR"
+  echo -n "$ZSH_THEME_GIT_PROMPT_UNTRACKED_COLOR$(git_untracked_status $statS)$ZSH_THEME_RESET_COLOR"
 }
 
 function custom_update_remotes() {
@@ -203,7 +214,6 @@ function custom_git_prompt_info() {
   echo -n "$(custom_git_remote_vs_master_status $remote $master)"
   echo -n "$ZSH_THEME_GIT_BRANCH_PREFIX${ref#refs/heads/}"
   echo -n "$(custom_git_remote_status $remote)"
-  echo -n "${ZSH_THEME_GIT_PROMPT_SUFFIX}"
   echo -n "$(git_files_status)"
-  echo -n "$(parse_git_dirty)"
+  echo -n "${ZSH_THEME_GIT_PROMPT_SUFFIX}"
 }
