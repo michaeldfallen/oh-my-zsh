@@ -6,9 +6,9 @@ ZSH_THEME_GIT_BRANCH_PREFIX="%{$FG[249]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$FG[243]%})%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}✗%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[green]%}✓%{$reset_color%} "
-ZSH_THEME_GIT_PROMPT_UNSTAGED_COLOR="%{$FG[203]%}"
-ZSH_THEME_GIT_PROMPT_STAGED_COLOR="%{$FG[155]%}"
-ZSH_THEME_GIT_PROMPT_UNTRACKED_COLOR="%{$FG[252]%}"
+ZSH_THEME_GIT_PROMPT_UNSTAGED_COLOR="%{$FG[161]%}"
+ZSH_THEME_GIT_PROMPT_STAGED_COLOR="%{$FG[118]%}"
+ZSH_THEME_GIT_PROMPT_UNTRACKED_COLOR="%{$FG[249]%}"
 ZSH_THEME_GIT_PROMPT_NOT_TRACKING="%{$FG[220]%}⌁%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_ADDED="A"
 ZSH_THEME_GIT_PROMPT_DELETED="D"
@@ -66,6 +66,21 @@ function shouldnt_you_commit {
   fi
 }
 
+function untrackedPrint {
+  string=$1
+  echo -n "$ZSH_THEME_GIT_PROMPT_UNTRACKED_COLOR$1$ZSH_THEME_RESET_COLOR"
+}
+
+function unstagedPrint {
+  string=$1
+  echo -n "$ZSH_THEME_GIT_PROMPT_UNSTAGED_COLOR$1$ZSH_THEME_RESET_COLOR"
+}
+
+function stagedPrint {
+  string=$1
+  echo -n "$ZSH_THEME_GIT_PROMPT_STAGED_COLOR$1$ZSH_THEME_RESET_COLOR"
+}
+
 function git_staged_status {
   gitStatus=$1
   modified="$(echo "$gitStatus" | grep -p "M[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
@@ -75,19 +90,24 @@ function git_staged_status {
   conflicted="$(echo "$gitStatus" | grep -p "U[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
 
   if [ -n "$added" ]; then
-    echo -n "$added$ZSH_THEME_GIT_PROMPT_ADDED"
+    echo -n "$added"
+    stagedPrint "$ZSH_THEME_GIT_PROMPT_ADDED"
   fi
   if [ -n "$deleted" ]; then 
-    echo -n "$deleted$ZSH_THEME_GIT_PROMPT_DELETED"
+    echo -n "$deleted"
+    stagedPrint "$ZSH_THEME_GIT_PROMPT_DELETED"
   fi
   if [ -n "$modified" ]; then 
-    echo -n "$modified$ZSH_THEME_GIT_PROMPT_MODIFIED"
+    echo -n "$modified"
+    stagedPrint "$ZSH_THEME_GIT_PROMPT_MODIFIED"
   fi
   if [ -n "$conflicted" ]; then
-    echo -n "$conflicted$ZSH_THEME_GIT_PROMPT_CONFLICTED"
+    echo -n "$conflicted"
+    stagedPrint "$ZSH_THEME_GIT_PROMPT_CONFLICTED"
   fi
   if [ -n "$renamed" ]; then
-    echo -n "$renamed$ZSH_THEME_GIT_PROMPT_RENAMED"
+    echo -n "$renamed"
+    stagedPrint "$ZSH_THEME_GIT_PROMPT_RENAMED"
   fi
 }
 
@@ -100,19 +120,24 @@ function git_unstaged_status {
   conflicted="$(echo "$gitStatus" | grep -p "[A|M|C|D|U|R ]U " | wc -l | grep -oEi '[1-9][0-9]*')" 
 
   if [ -n "$added" ]; then
-    echo -n "$added$ZSH_THEME_GIT_PROMPT_ADDED"
+    echo -n "$added"
+    unstagedPrint "$ZSH_THEME_GIT_PROMPT_ADDED"
   fi
   if [ -n "$deleted" ]; then 
-    echo -n "$deleted$ZSH_THEME_GIT_PROMPT_DELETED"
+    echo -n "$deleted"
+    unstagedPrint "$ZSH_THEME_GIT_PROMPT_DELETED"
   fi
   if [ -n "$modified" ]; then 
-    echo -n "$modified$ZSH_THEME_GIT_PROMPT_MODIFIED"
+    echo -n "$modified"
+    unstagedPrint "$ZSH_THEME_GIT_PROMPT_MODIFIED"
   fi
   if [ -n "$conflicted" ]; then
-    echo -n "$conflicted$ZSH_THEME_GIT_PROMPT_CONFLICTED"
+    echo -n "$conflicted"
+    unstagedPrint "$ZSH_THEME_GIT_PROMPT_CONFLICTED"
   fi
   if [ -n "$renamed" ]; then
-    echo -n "$renamed$ZSH_THEME_GIT_PROMPT_RENAMED"
+    echo -n "$renamed"
+    unstagedPrint "$ZSH_THEME_GIT_PROMPT_RENAMED"
   fi
 }
 
@@ -121,7 +146,8 @@ function git_untracked_status {
   untracked="$(echo "$gitStatus" | grep -p "?? " | wc -l | grep -oEi '[1-9][0-9]*')" 
  
   if [ -n "$untracked" ]; then
-    echo -n "$untracked$ZSH_THEME_GIT_PROMPT_UNTRACKED"
+    echo -n "$untracked"
+    untrackedPrint "$ZSH_THEME_GIT_PROMPT_UNTRACKED"
   fi
 }
 
@@ -130,13 +156,14 @@ function git_files_status {
   stagedChanges="$(git_staged_status $statS)"
   unstagedChanges="$(git_unstaged_status $statS)"
   untrackedChanges="$(git_untracked_status $statS)"
-  changes="$stagedChanges$unstagedChanges$untrackedChanges"
-  if [ -n "$changes" ]; then
-    echo -n "$ZSH_THEME_GIT_PROMPT_SEPARATOR"
-
-    echo -n "$ZSH_THEME_GIT_PROMPT_STAGED_COLOR$stagedChanges$ZSH_THEME_RESET_COLOR"
-    echo -n "$ZSH_THEME_GIT_PROMPT_UNSTAGED_COLOR$unstagedChanges$ZSH_THEME_RESET_COLOR"
-    echo -n "$ZSH_THEME_GIT_PROMPT_UNTRACKED_COLOR$untrackedChanges$ZSH_THEME_RESET_COLOR"
+  if [ -n "$stagedChanges" ]; then
+    echo -n "$ZSH_THEME_GIT_PROMPT_SEPARATOR$stagedChanges"
+  fi
+  if [ -n "$unstagedChanges" ]; then
+    echo -n "$ZSH_THEME_GIT_PROMPT_SEPARATOR$unstagedChanges"
+  fi
+  if [ -n "$untrackedChanges" ]; then
+    echo -n "$ZSH_THEME_GIT_PROMPT_SEPARATOR$untrackedChanges"
   fi
 }
 
@@ -196,13 +223,14 @@ function custom_git_remote_status() {
     
     if [ $ahead -eq 0 ] && [ $behind -gt 0 ]
     then
-      echo "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE"
+      echo -n "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE"
     elif [ $ahead -gt 0 ] && [ $behind -eq 0 ]
     then
-      echo "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE"
+      echo -n "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE"
     elif [ $ahead -gt 0 ] && [ $behind -gt 0 ]
     then
-      echo "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE"
+      echo -n "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$behind%{$reset_color%}$ZSH_THEME_GIT_PROMPT_BEHIND_REMOTE"
+      echo -n "$ZSH_THEME_GIT_PROMPT_SEPARATOR%{$FG[255]%}$ahead%{$reset_color%}$ZSH_THEME_GIT_PROMPT_AHEAD_REMOTE"
     fi
   fi
 }
