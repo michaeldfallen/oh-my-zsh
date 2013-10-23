@@ -8,6 +8,7 @@ ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[red]%}✗%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[green]%}✓%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_UNSTAGED_COLOR="%{$FG[161]%}"
 ZSH_THEME_GIT_PROMPT_STAGED_COLOR="%{$FG[118]%}"
+ZSH_THEME_GIT_PROMPT_CONFLICTED_COLOR="%{$FG[220]%}"
 ZSH_THEME_GIT_PROMPT_UNTRACKED_COLOR="%{$FG[249]%}"
 ZSH_THEME_GIT_PROMPT_NOT_TRACKING="%{$FG[220]%}⌁%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_ADDED="A"
@@ -15,6 +16,9 @@ ZSH_THEME_GIT_PROMPT_DELETED="D"
 ZSH_THEME_GIT_PROMPT_MODIFIED="M"
 ZSH_THEME_GIT_PROMPT_UNTRACKED="U"
 ZSH_THEME_GIT_PROMPT_CONFLICTED="C"
+ZSH_THEME_GIT_PROMPT_CONFLICTED_US="U"
+ZSH_THEME_GIT_PROMPT_CONFLICTED_THEM="T"
+ZSH_THEME_GIT_PROMPT_CONFLICTED_BOTH="B"
 ZSH_THEME_GIT_PROMPT_RENAMED="R"
 ZSH_THEME_GIT_PROMPT_MASTER="${ZSH_THEME_GIT_BRANCH_PREFIX}𝘮 %{$reset_color%}" 
 
@@ -81,13 +85,17 @@ function stagedPrint {
   echo -n "$ZSH_THEME_GIT_PROMPT_STAGED_COLOR$1$ZSH_THEME_RESET_COLOR"
 }
 
+function conflictedPrint {
+  string=$1
+  echo -n "$ZSH_THEME_GIT_PROMPT_CONFLICTED_COLOR$1$ZSH_THEME_RESET_COLOR"
+}
+
 function git_staged_status {
   gitStatus=$1
   modified="$(echo "$gitStatus" | grep -p "M[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
   added="$(echo "$gitStatus" | grep -p "A[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
   deleted="$(echo "$gitStatus" | grep -p "D[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
   renamed="$(echo "$gitStatus" | grep -p "R[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
-  conflicted="$(echo "$gitStatus" | grep -p "U[A|M|C|D|U|R ] " | wc -l | grep -oEi '[1-9][0-9]*')"
 
   if [ -n "$added" ]; then
     echo -n "$added"
@@ -101,14 +109,30 @@ function git_staged_status {
     echo -n "$modified"
     stagedPrint "$ZSH_THEME_GIT_PROMPT_MODIFIED"
   fi
-  if [ -n "$conflicted" ]; then
-    echo -n "$conflicted"
-    stagedPrint "$ZSH_THEME_GIT_PROMPT_CONFLICTED"
-  fi
   if [ -n "$renamed" ]; then
     echo -n "$renamed"
     stagedPrint "$ZSH_THEME_GIT_PROMPT_RENAMED"
   fi
+}
+
+function git_conflicted_status {
+  gitStatus=$1
+  conflictedUs="$(echo "$gitStatus" | grep -p "[A|M|C|D|R ]U " | wc -l | grep -oEi '[1-9][0-9]*')" 
+  conflictedThem="$(echo "$gitStatus" | grep -p "U[A|M|C|D|R ] " | wc -l | grep -oEi '[1-9][0-9]*')" 
+  conflictedBoth="$(echo "$gitStatus" | grep -p "UU " | wc -l | grep -oEi '[1-9][0-9]*')" 
+ 
+  if [ -n "$conflictedUs" ]; then
+    echo -n "$conflictedUs"
+    conflictedPrint "$ZSH_THEME_GIT_PROMPT_CONFLICTED_US"
+  fi
+  if [ -n "$conflictedBoth" ]; then
+    echo -n "$conflictedBoth"
+    conflictedPrint "$ZSH_THEME_GIT_PROMPT_CONFLICTED_BOTH"
+  fi
+  if [ -n "$conflictedThem" ]; then
+    echo -n "$conflictedThem"
+    conflictedPrint "$ZSH_THEME_GIT_PROMPT_CONFLICTED_THEM"
+  fi 
 }
 
 function git_unstaged_status {
@@ -117,7 +141,6 @@ function git_unstaged_status {
   added="$(echo "$gitStatus" | grep -p "[A|M|C|D|U|R ]A " | wc -l | grep -oEi '[1-9][0-9]*')"
   deleted="$(echo "$gitStatus" | grep -p "[A|M|C|D|U|R ]D " | wc -l | grep -oEi '[1-9][0-9]*')"
   renamed="$(echo "$gitStatus" | grep -p "[A|M|C|D|U|R ]R " | wc -l | grep -oEi '[1-9][0-9]*')"
-  conflicted="$(echo "$gitStatus" | grep -p "[A|M|C|D|U|R ]U " | wc -l | grep -oEi '[1-9][0-9]*')" 
 
   if [ -n "$added" ]; then
     echo -n "$added"
@@ -156,8 +179,12 @@ function git_files_status {
   stagedChanges="$(git_staged_status $statS)"
   unstagedChanges="$(git_unstaged_status $statS)"
   untrackedChanges="$(git_untracked_status $statS)"
+  conflictedChanges="$(git_conflicted_status $statS)"
   if [ -n "$stagedChanges" ]; then
     echo -n "$ZSH_THEME_GIT_PROMPT_SEPARATOR$stagedChanges"
+  fi
+  if [ -n "$conflictedChanges" ]; then
+    echo -n "$ZSH_THEME_GIT_PROMPT_SEPARATOR$conflictedChanges"
   fi
   if [ -n "$unstagedChanges" ]; then
     echo -n "$ZSH_THEME_GIT_PROMPT_SEPARATOR$unstagedChanges"
